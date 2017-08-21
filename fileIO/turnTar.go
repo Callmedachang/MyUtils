@@ -1,4 +1,4 @@
-package utils
+package fileIO
 import (
 	"archive/tar"
 	"io"
@@ -9,7 +9,7 @@ import (
 )
 // Create a buffer to write our archive to.
 // main functions shows how to TarGz a directory and
-// UnTarGz a file
+// UnTarGz a fileIO
 //func main() {
 //  targetFilePath := "testdata.tar.gz"
 //  srcDirPath := "testdata"
@@ -17,8 +17,8 @@ import (
 //  UnTarGz(targetFilePath, srcDirPath+"_temp")
 //}
 
-// Gzip and tar from source directory or file to destination file
-// you need check file exist before you call this function
+// Gzip and tar from source directory or fileIO to destination fileIO
+// you need check fileIO exist before you call this function
 func TarGz(srcDirPath string, destFilePath string) {
 	//创建目标目录（文件）
 	fw, err := os.Create(destFilePath)
@@ -33,7 +33,7 @@ func TarGz(srcDirPath string, destFilePath string) {
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
-	// Check if it's a file or a directory
+	// Check if it's a fileIO or a directory
 	f, err := os.Open(srcDirPath)
 	dealErr(err)
 	fi, err := f.Stat()//得到fileinfo
@@ -43,7 +43,7 @@ func TarGz(srcDirPath string, destFilePath string) {
 		fmt.Println("Cerating tar.gz from directory...")
 		tarGzDir(srcDirPath, path.Base(srcDirPath), tw)
 	} else {
-		// handle file directly
+		// handle fileIO directly
 		fmt.Println("Cerating tar.gz from " + fi.Name() + "...")
 		tarGzFile(srcDirPath, fi.Name(), tw, fi)
 	}
@@ -60,13 +60,13 @@ func tarGzDir(srcDirPath string, recPath string, tw *tar.Writer) {
 	dealErr(err)
 	defer dir.Close()
 
-	// Get file info slice
+	// Get fileIO info slice
 	fis, err := dir.Readdir(0)
 	dealErr(err)
 	for _, fi := range fis {
 		// Append path
 		curPath := srcDirPath + "/" + fi.Name()
-		// Check it is directory or file
+		// Check it is directory or fileIO
 		if fi.IsDir() {
 			// Directory
 			// (Directory won't add unitl all subfiles are added)
@@ -74,7 +74,7 @@ func tarGzDir(srcDirPath string, recPath string, tw *tar.Writer) {
 			tarGzDir(curPath, recPath+"/"+fi.Name(), tw)
 		} else {
 			// File
-			fmt.Printf("Adding file...%s\\n", curPath)
+			fmt.Printf("Adding fileIO...%s\\n", curPath)
 		}
 
 		tarGzFile(curPath, recPath+"/"+fi.Name(), tw, fi)
@@ -115,14 +115,14 @@ func tarGzFile(srcFile string, recPath string, tw *tar.Writer, fi os.FileInfo) {
 		err = tw.WriteHeader(hdr)
 		dealErr(err)
 
-		// Write file data
+		// Write fileIO data
 		_, err = io.Copy(tw, fr)
 		dealErr(err)
 	}
 }
 
-// Ungzip and untar from source file to destination directory
-// you need check file exist before you call this function
+// Ungzip and untar from source fileIO to destination directory
+// you need check fileIO exist before you call this function
 func UnTarGz(srcFilePath string, destDirPath string) {
 	fmt.Println("UnTarGzing " + srcFilePath + "...")
 	// Create destination directory
@@ -145,13 +145,13 @@ func UnTarGz(srcFilePath string, destDirPath string) {
 			break
 		}
 		//handleError(err)
-		fmt.Println("UnTarGzing file..." + hdr.Name)
-		// Check if it is diretory or file
+		fmt.Println("UnTarGzing fileIO..." + hdr.Name)
+		// Check if it is diretory or fileIO
 		if hdr.Typeflag != tar.TypeDir {
 			// Get files from archive
-			// Create diretory before create file
+			// Create diretory before create fileIO
 			os.MkdirAll(destDirPath+"/"+path.Dir(hdr.Name), os.ModePerm)
-			// Write data to file
+			// Write data to fileIO
 			fw, _ := os.Create(destDirPath + "/" + hdr.Name)
 			dealErr(err)
 			_, err = io.Copy(fw, tr)

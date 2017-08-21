@@ -1,4 +1,4 @@
-package lwcHttp
+package http
 
 import (
 "net/http"

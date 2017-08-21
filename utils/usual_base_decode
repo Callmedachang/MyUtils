@@ -1,0 +1,6 @@
+package utils
+
+func DecodeBaseEncrypt(code string) string {
+	str := DesBase64Decrypt([]byte(code))
+	return string(str)
+}
